@@ -1,10 +1,10 @@
-
+import React from 'react';
 import { Analytics } from "@vercel/analytics/react"; // 👈 importa analytics
-import React, { useState, useEffect } from 'react';
 import type { Playlist, SpotifyUserProfile } from './types';
 import { generatePlaylist } from './services/geminiService';
 import { redirectToSpotifyAuth, handleSpotifyCallback, getStoredToken, createPlaylistOnSpotify, getUserProfile } from './services/spotifyService';
 import { sendLoginNotification, sendPlaylistGenerationNotification, sendPlaylistCreationNotification } from './services/discordService';
+import { SKIP_SPOTIFY_AUTH } from './config';
 
 
 import Login from './components/Login';
@@ -20,28 +20,41 @@ type AppState = 'auth_check' | 'login' | 'initial' | 'loading_playlist' | 'playl
 const SYSTEM_INSTRUCTION = "Eres un DJ profesional y musicólogo experto especializado en música urbana y callejera. Tu misión es crear una playlist excepcional basada en la solicitud del usuario. La playlist debe ser coherente, original y atractiva, reflejando el tema, emoción o contexto que el usuario describa. La selección debe centrarse en artistas con estilo callejero, urbano o trap, como JC Reyes, Luar la L, Hades66, Mora, Anuel AA, entre otros. Incluye solo canciones reales y artistas auténticos y verificados. Si el usuario menciona un artista entre comillas dobles (por ejemplo: \"JC Reyes\"), debes incluir únicamente canciones de ese artista exacto y no de artistas con nombres similares. Si el usuario pide un género, emoción o situación, adapta el tono, ritmo y energía de las canciones a ese contexto. Usa nombres de playlist originales y acordes con la temática. No inventes canciones ni mezcles información de distintos artistas. Además, prioriza canciones que estén de moda, sean populares o hayan sido lanzadas recientemente en la actualidad (año 2025), asegurando que la selección refleje las tendencias más recientes del movimiento urbano y callejero. Asegúrate de que toda la selección mantenga calidad, coherencia y autenticidad. Recuerda que si te dicen que quieren un cantante especifico y solo ese, tienes que poner solo ese cantante no otro.";
 
 const App: React.FC = () => {
-  const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
-  const [appState, setAppState] = useState<AppState>('auth_check'); 
-  const [playlist, setPlaylist] = useState<Playlist | null>(null);
-  const [lastPrompt, setLastPrompt] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-  const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = useState<string>('');
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<SpotifyUserProfile | null>(null);
+  const [spotifyToken, setSpotifyToken] = React.useState<string | null>(null);
+  const [appState, setAppState] = React.useState<AppState>('auth_check'); 
+  const [playlist, setPlaylist] = React.useState<Playlist | null>(null);
+  const [lastPrompt, setLastPrompt] = React.useState<string>('');
+  const [error, setError] = React.useState<string | null>(null);
+  const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = React.useState<string>('');
+  const [authError, setAuthError] = React.useState<string | null>(null);
+  const [userProfile, setUserProfile] = React.useState<SpotifyUserProfile | null>(null);
 
   const fetchAndSetUserProfile = async (token: string) => {
     try {
       const profile = await getUserProfile(token);
       setUserProfile(profile);
-      sendLoginNotification(profile);
+      if (!SKIP_SPOTIFY_AUTH) {
+        sendLoginNotification(profile);
+      }
     } catch (e) {
       console.error("Failed to fetch Spotify user profile, logging out.", e);
       handleLogout();
     }
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const initializeAuth = async () => {
+      // --- MODO DE PRUEBAS ---
+      // Si el flag está activado, se salta toda la lógica de autenticación real.
+      if (SKIP_SPOTIFY_AUTH) {
+        console.warn("--- MODO DE PRUEBA ACTIVADO --- La autenticación de Spotify se está omitiendo.");
+        const dummyToken = 'dummy-spotify-token-for-testing';
+        setSpotifyToken(dummyToken);
+        await fetchAndSetUserProfile(dummyToken); // Usará el perfil falso del servicio mockeado
+        setAppState('initial');
+        return;
+      }
+
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
       const authErrorParam = params.get('error');
@@ -131,7 +144,7 @@ const App: React.FC = () => {
     try {
       const generatedPlaylist = await generatePlaylist(prompt, SYSTEM_INSTRUCTION);
       setPlaylist(generatedPlaylist);
-      if (userProfile) {
+      if (userProfile && !SKIP_SPOTIFY_AUTH) {
         sendPlaylistGenerationNotification({
           user: userProfile,
           prompt: prompt,
@@ -153,7 +166,7 @@ const App: React.FC = () => {
     try {
       const url = await createPlaylistOnSpotify(spotifyToken, playlist);
       setSpotifyPlaylistUrl(url);
-      if (userProfile) {
+      if (userProfile && !SKIP_SPOTIFY_AUTH) {
           sendPlaylistCreationNotification({
               user: userProfile,
               playlist: playlist,
