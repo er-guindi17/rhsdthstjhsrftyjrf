@@ -1,4 +1,4 @@
-import { REDIRECT_URI, SPOTIFY_SCOPES, SPOTIFY_CLIENT_ID } from '../config';
+import { REDIRECT_URI, SPOTIFY_SCOPES, SPOTIFY_CLIENT_ID, SKIP_SPOTIFY_AUTH } from '../config';
 import type { Playlist, Song, SpotifyArtist, SpotifyUserProfile } from '../types';
 
 // --- Funciones para el flujo de autenticación PKCE ---
@@ -121,6 +121,19 @@ async function spotifyApiFetch(endpoint: string, token: string, options: Request
 }
 
 export async function searchArtists(token: string, query: string): Promise<SpotifyArtist[]> {
+    if (SKIP_SPOTIFY_AUTH) {
+        console.log(`--- MODO DE PRUEBA: Búsqueda de artista simulada para "${query}" ---`);
+        if (!query.trim()) return [];
+        // Devolver una lista falsa de artistas para que la UI funcione
+        return [
+            { id: '1', name: `Artista de prueba 1 (${query})`, images: [] },
+            { id: '2', name: `Artista de prueba 2 (${query})`, images: [] },
+            { id: '3', name: `Artista de prueba 3 (${query})`, images: [] },
+            { id: '4', name: `Artista de prueba 4 (${query})`, images: [] },
+            { id: '5', name: `Artista de prueba 5 (${query})`, images: [] },
+        ];
+    }
+    
     if (!query.trim()) {
         return [];
     }
@@ -130,6 +143,22 @@ export async function searchArtists(token: string, query: string): Promise<Spoti
 }
 
 export async function getArtistsByIds(token: string, ids: string[]): Promise<SpotifyArtist[]> {
+    if (SKIP_SPOTIFY_AUTH) {
+        console.log(`--- MODO DE PRUEBA: Obteniendo artistas sugeridos simulados ---`);
+        // Devolver una lista fija de artistas para las sugerencias
+        const mockArtists: SpotifyArtist[] = [
+            { id: '0FwnPHExlRRxEZPLAi5tmG', name: 'JC Reyes (Prueba)', images: []},
+            { id: '4CQdcx66F116k2db2Y0rjE', name: 'Hades66 (Prueba)', images: []},
+            { id: '4axKuDPr6WKcDCyh8vueTY', name: 'Luar La L (Prueba)', images: []},
+            { id: '78F6Xkd46aMHkr4AP60TXY', name: 'Clarent (Prueba)', images: []},
+            { id: '4cYbf45YbZptNISnhay0xH', name: 'ROA (Prueba)', images: []},
+            { id: '3E12tRURRvPfHz0hAMCFYc', name: 'Omar Courtz (Prueba)', images: []},
+            { id: '54seKvtsZauR1iauN0ptpo', name: 'De La Rose (Prueba)', images: []},
+            { id: '2w1wJcGdJQ4Lw08oKBnDsw', name: 'El Jincho (Prueba)', images: []},
+        ];
+        return mockArtists;
+    }
+    
     if (ids.length === 0) {
         return [];
     }
@@ -139,6 +168,15 @@ export async function getArtistsByIds(token: string, ids: string[]): Promise<Spo
 }
 
 export async function getUserProfile(token: string): Promise<SpotifyUserProfile> {
+    if (SKIP_SPOTIFY_AUTH) {
+        console.log("--- MODO DE PRUEBA: Devolviendo perfil de usuario falso ---");
+        return {
+            id: 'testuser',
+            display_name: 'Usuario de Prueba',
+            images: [],
+            external_urls: { spotify: '#' }
+        };
+    }
     const profile = await spotifyApiFetch('/me', token);
     return profile;
 }
@@ -201,6 +239,14 @@ async function addTracksToPlaylist(token:string, playlistId: string, trackUris: 
 }
 
 export async function createPlaylistOnSpotify(token: string, playlistData: Playlist): Promise<string> {
+    if (SKIP_SPOTIFY_AUTH) {
+        console.log("--- MODO DE PRUEBA: Creación de playlist en Spotify SIMULADA ---");
+        console.log("Datos de la Playlist:", playlistData);
+        // Simula un retraso para que el loader se muestre de forma realista
+        await new Promise(resolve => setTimeout(resolve, 1500)); 
+        return `https://spotify.com/playlist/fake-playlist-id-for-testing`;
+    }
+    
     const userProfile = await getUserProfile(token);
     const userId = userProfile.id;
     
