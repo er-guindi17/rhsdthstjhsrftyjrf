@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [spotifyPlaylistUrl, setSpotifyPlaylistUrl] = React.useState<string>('');
   const [authError, setAuthError] = React.useState<string | null>(null);
   const [userProfile, setUserProfile] = React.useState<SpotifyUserProfile | null>(null);
+  const [prompt, setPrompt] = React.useState('');
 
   const fetchAndSetUserProfile = async (token: string) => {
     try {
@@ -190,6 +191,7 @@ const App: React.FC = () => {
 
   const handleReset = () => {
     setPlaylist(null);
+    setPrompt('');
     setLastPrompt('');
     setSpotifyPlaylistUrl('');
     setError(null);
@@ -199,18 +201,18 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch(appState) {
         case 'loading_playlist':
-            return <Loader message="Generando tu playlist... La IA está pensando." />;
+            return <Loader message="Generando tu playlist..." />;
         case 'initial':
-            return <InitialState />;
+            return <InitialState onSuggestionClick={setPrompt} />;
         case 'playlist_view':
-            return playlist ? <PlaylistView playlist={playlist} onCreateSpotify={handleCreateSpotifyPlaylist} onRegenerate={handleRegenerate} isLoading={false} /> : <InitialState />;
+            return playlist ? <PlaylistView playlist={playlist} onCreateSpotify={handleCreateSpotifyPlaylist} onRegenerate={handleRegenerate} isLoading={false} /> : <InitialState onSuggestionClick={setPrompt} />;
         case 'creating_spotify':
             return playlist ? <PlaylistView playlist={playlist} onCreateSpotify={() => {}} onRegenerate={() => {}} isLoading={true} /> : <Loader message="Creando playlist en Spotify..." />;
         case 'success':
             return <SuccessView playlistName={playlist?.playlistName || 'Tu Playlist'} playlistUrl={spotifyPlaylistUrl} onReset={handleReset} />;
         case 'error':
             return (
-                <div className="text-center p-8 bg-red-900/30 border border-red-700 rounded-xl animate-scale-in">
+                <div className="text-center p-8 bg-red-900/30 border border-red-500 rounded-xl animate-scale-in">
                     <h3 className="text-2xl font-bold text-red-300">¡Ups! Algo salió mal</h3>
                     <p className="mt-2 text-red-400">{error}</p>
                     <button onClick={handleReset} className="mt-6 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
@@ -219,13 +221,14 @@ const App: React.FC = () => {
                 </div>
             );
         default:
-            return <InitialState />;
+            return <InitialState onSuggestionClick={setPrompt} />;
     }
   };
   
   if (appState === 'auth_check') {
     return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="aurora-background"></div>
             <Loader message="Verificando autenticación..." />
         </div>
     );
@@ -241,19 +244,28 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white p-4 sm:p-8">
-      <Header isLoggedIn={!!spotifyToken} onLogout={handleLogout} userName={userProfile?.display_name} />
-      <div className="max-w-3xl mx-auto mt-8 animate-fade-in" style={{ animationDuration: '0.8s' }}>
-        <main>
-            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 space-y-6 shadow-lg">
-                <PromptForm onSubmit={handlePromptSubmit} isLoading={appState === 'loading_playlist'} spotifyToken={spotifyToken} />
-                <hr className="border-gray-700" />
-                {renderContent()}
-            </div>
-        </main>
-      </div> 
-     <Analytics />
-    </div>
+    <>
+      <div className="aurora-background"></div>
+      <div className="min-h-screen p-4 sm:p-8">
+        <Header isLoggedIn={!!spotifyToken} onLogout={handleLogout} userName={userProfile?.display_name} />
+        <div className="max-w-3xl mx-auto mt-8 animate-fade-in" style={{ animationDuration: '0.8s' }}>
+          <main>
+              <div className="bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl p-6 space-y-6 shadow-2xl backdrop-blur-lg">
+                  <PromptForm 
+                    prompt={prompt}
+                    setPrompt={setPrompt}
+                    onSubmit={handlePromptSubmit} 
+                    isLoading={appState === 'loading_playlist'} 
+                    spotifyToken={spotifyToken} 
+                  />
+                  <hr className="border-[var(--color-border)]" />
+                  {renderContent()}
+              </div>
+          </main>
+        </div> 
+       <Analytics />
+      </div>
+    </>
   );
 };
 
