@@ -2,7 +2,7 @@
 // Para desarrollo local, reemplaza los siguientes valores con tus propias claves.
 // Para producción (Vercel), la aplicación usará automáticamente las variables de entorno.
 export const API_KEY = process.env.API_KEY || 'AIzaSyBbVozJ3ADuP34BmiBXCMSITYfNdpDd4EA';
-export const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '477cbf4bd8294e26b41cf1c169b3e1b5';
+export const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '9fedd4ba7fbb438ba6a8b7b8a955c045';
 
 
 // --- (Opcional) Configuración de Webhook de Discord ---
