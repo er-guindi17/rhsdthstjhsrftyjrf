@@ -12,27 +12,27 @@ interface PlaylistViewProps {
 
 const PlaylistView: React.FC<PlaylistViewProps> = ({ playlist, onCreateSpotify, onRegenerate, isLoading }) => {
   return (
-    <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 animate-fade-in-up">
-      <div className="mb-6">
+    <div className="animate-fade-in-up">
+      <div className="mb-6 text-center">
         <h2 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-500 text-transparent bg-clip-text">
           {playlist.playlistName}
         </h2>
-        <p className="mt-2 text-gray-400">{playlist.description}</p>
+        <p className="mt-2 text-[var(--color-text-secondary)]">{playlist.description}</p>
       </div>
 
-      <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
         {playlist.songs.map((song, index) => (
           <div 
             key={`${song.title}-${index}`} 
-            className="flex items-center gap-4 p-3 bg-gray-900/50 rounded-lg animate-fade-in-up"
+            className="group flex items-center gap-4 p-3 bg-gray-900/50 hover:bg-gray-800/70 rounded-lg transition-all duration-200 animate-fade-in-up"
             style={{ animationDelay: `${index * 50}ms` }}
           >
-            <div className="text-gray-500">
+            <div className="text-gray-600 group-hover:text-[var(--color-accent)] transition-colors">
               <MusicNoteIcon />
             </div>
-            <div>
-              <p className="font-semibold text-gray-200">{song.title}</p>
-              <p className="text-sm text-gray-400">{song.artist} — {song.album}</p>
+            <div className="flex-grow">
+              <p className="font-semibold text-[var(--color-text-primary)]">{song.title}</p>
+              <p className="text-sm text-[var(--color-text-secondary)]">{song.artist} — {song.album}</p>
             </div>
           </div>
         ))}
@@ -42,7 +42,7 @@ const PlaylistView: React.FC<PlaylistViewProps> = ({ playlist, onCreateSpotify, 
         <button
           onClick={onCreateSpotify}
           disabled={isLoading}
-          className="w-full flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-100"
+          className="w-full flex-1 flex items-center justify-center gap-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] focus:ring-[var(--color-accent)] shadow-lg hover:shadow-[var(--color-accent-glow)]"
         >
           {isLoading ? (
             <>
@@ -62,7 +62,7 @@ const PlaylistView: React.FC<PlaylistViewProps> = ({ playlist, onCreateSpotify, 
         <button
           onClick={onRegenerate}
           disabled={isLoading}
-          className="w-full flex-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-300"
+          className="w-full flex-1 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-300 transform hover:-translate-y-0.5"
         >
           Generar Otra
         </button>
