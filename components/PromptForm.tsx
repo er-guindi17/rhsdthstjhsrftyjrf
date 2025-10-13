@@ -1,20 +1,20 @@
-
-
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import MagicIcon from './icons/MagicIcon';
 import UserIcon from './icons/UserIcon.tsx';
 import ArtistSearchModal from './ArtistSearchModal';
 
 interface PromptFormProps {
+  prompt: string;
+  // FIX: Argument of type '(prev: any) => string' is not assignable to parameter of type 'string'. Changed type to allow functional updates.
+  setPrompt: React.Dispatch<React.SetStateAction<string>>;
   onSubmit: (prompt: string) => void;
   isLoading: boolean;
   spotifyToken: string | null;
 }
 
-const PromptForm: React.FC<PromptFormProps> = ({ onSubmit, isLoading, spotifyToken }) => {
-  const [prompt, setPrompt] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+const PromptForm: React.FC<PromptFormProps> = ({ prompt, setPrompt, onSubmit, isLoading, spotifyToken }) => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,14 +49,14 @@ const PromptForm: React.FC<PromptFormProps> = ({ onSubmit, isLoading, spotifyTok
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex justify-between items-center">
-          <label htmlFor="prompt" className="block text-lg font-medium text-gray-300">
+          <label htmlFor="prompt" className="block text-lg font-medium text-[var(--color-text-primary)]">
             Describe el ambiente de tu playlist...
           </label>
            <button
             type="button"
             onClick={() => setIsModalOpen(true)}
             disabled={isLoading || !spotifyToken}
-            className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-1.5 px-3 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
+            className="bg-gray-700/60 hover:bg-gray-700 border border-gray-600 text-gray-300 font-semibold py-1.5 px-3 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-all duration-200"
           >
             <UserIcon />
             @ Artistas
@@ -69,14 +69,14 @@ const PromptForm: React.FC<PromptFormProps> = ({ onSubmit, isLoading, spotifyTok
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Ej: Quiero una playlist con música tipo 'JC Reyes'"
-            className="w-full h-28 p-4 bg-gray-800 border-2 border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 resize-none text-gray-200 placeholder-gray-500"
+            className="w-full h-28 p-4 bg-gray-900/50 border-2 border-[var(--color-border)] rounded-lg focus:ring-4 focus:ring-[var(--color-accent-glow)] focus:border-[var(--color-accent)] transition-all duration-300 resize-none text-[var(--color-text-primary)] placeholder-gray-500"
             disabled={isLoading}
           />
         </div>
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-green-500"
+          disabled={isLoading || !prompt.trim()}
+          className="w-full flex items-center justify-center gap-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] focus:ring-[var(--color-accent)] shadow-lg hover:shadow-[var(--color-accent-glow)]"
         >
           {isLoading ? (
             <>
