@@ -20,7 +20,7 @@ export const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || 'https://d
 // Poner a `true` para saltar la autenticación de Spotify. Esto permite probar
 // la generación de playlists sin necesidad de conectar una cuenta de Spotify.
 // Las funciones como crear playlist en Spotify o buscar artistas serán simuladas.
-export const SKIP_SPOTIFY_AUTH = false;
+export const SKIP_SPOTIFY_AUTH = true;
 
 
 // =================================================================================
